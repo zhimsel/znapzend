@@ -373,10 +373,10 @@ sub sendRecvSnapshots {
 
     my @cmd;
     if ($lastCommon){
-        @cmd = ([@{$self->priv}, 'zfs', 'send', @sendOpt, $incrOpt, $lastCommon, $lastSnapshot]);
+        @cmd = ([@{$self->priv}, 'zfs', 'send', '-p', @sendOpt, $incrOpt, $lastCommon, $lastSnapshot]);
     }
     else{
-        @cmd = ([@{$self->priv}, 'zfs', 'send', @sendOpt, $lastSnapshot]);
+        @cmd = ([@{$self->priv}, 'zfs', 'send', '-p', @sendOpt, $lastSnapshot]);
     }
 
     #if mbuffer port is set, run in 'network mode'
@@ -384,7 +384,7 @@ sub sendRecvSnapshots {
         my $recvPid;
 
         my @recvCmd = $self->$buildRemoteRefArray($remote, [$mbuffer, @{$self->mbufferParam},
-            $mbufferSize, '-4', '-I', $mbufferPort], [@{$self->priv}, 'zfs', 'recv', $recvOpt, $dstDataSetPath]);
+            $mbufferSize, '-4', '-I', $mbufferPort], [@{$self->priv}, 'zfs', 'recv', '-o', 'canmount=noauto', $recvOpt, $dstDataSetPath]);
 
         my $cmd = $shellQuote->(@recvCmd);
 
@@ -451,7 +451,7 @@ sub sendRecvSnapshots {
     }
     else {
         my @mbCmd = $mbuffer ne 'off' ? ([$mbuffer, @{$self->mbufferParam}, $mbufferSize]) : () ;
-        my $recvCmd = [@{$self->priv}, 'zfs', 'recv' , $recvOpt, $dstDataSetPath];
+        my $recvCmd = [@{$self->priv}, 'zfs', 'recv' , '-o', 'canmount=noauto', $recvOpt, $dstDataSetPath];
 
         push @cmd,  $self->$buildRemoteRefArray($remote, @mbCmd, $recvCmd);
 
